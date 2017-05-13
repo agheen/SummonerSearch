@@ -25,12 +25,12 @@ req_summoner = requests.get(r_summoner)
 #print('RETURN TEXT\n' + req_summoner.text + '\n')
 
 #grabs summoner id from req.text
-id = str(req_summoner.json().get(inp1).get('id'))
-#print('Summoner Id: ' + id + '\n')
+sum_id = str(req_summoner.json().get(inp1).get('id'))
+#print('Summoner Id: ' + sum_id + '\n')
 
 #RANKED RANKING REQUEST
 #requests summoners solo/duo leauge
-r_league = 'https://na.api.riotgames.com/api/lol/NA/v2.5/league/by-summoner/'+id+'?api_key='+key
+r_league = 'https://na.api.riotgames.com/api/lol/NA/v2.5/league/by-summoner/'+sum_id+'?api_key='+key
 req_league = requests.get(r_league)
 #print(req_league.text)
 
@@ -39,7 +39,7 @@ req_league = requests.get(r_league)
 ############
 
 #json object containing 2 dictionaries, which are SOLO/DUO and FLEX league
-summoner_league = req_league.json().get(id)
+summoner_league = req_league.json().get(sum_id)
 
 #grabs list of members in league (entries)
 solo_league = summoner_league[0]
@@ -54,7 +54,7 @@ for league in summoner_league:
 		#when found, grabs summoners divison, wins, losses
 		for solo_member in solo_entries:
 			player_id = solo_member.get('playerOrTeamId')
-			if player_id == id:
+			if player_id == sum_id:
 				solo_division = solo_member.get('division')
 				solo_tier = solo_league.get('tier')
 				solo_points = str(solo_member.get('leaguePoints'))
@@ -75,7 +75,7 @@ for league in summoner_league:
 		#when found, grabs summoners divison, wins, loses
 		for flex_member in flex_entries:
 			player_id = flex_member.get('playerOrTeamId')
-			if player_id == id:
+			if player_id == sum_id:
 				flex_division = flex_member.get('division')
 				flex_tier = flex_league.get('tier')
 				flex_points = str(flex_member.get('leaguePoints'))
@@ -90,7 +90,7 @@ for league in summoner_league:
 				
 #IN-GAME REQUEST
 #requests summoner in-game status, 404 if not in game
-r_ingame = 'https://na.api.riotgames.com/observer-mode/rest/consumer/getSpectatorGameInfo/NA1/'+id+'?api_key='+key
+r_ingame = 'https://na.api.riotgames.com/observer-mode/rest/consumer/getSpectatorGameInfo/NA1/'+sum_id+'?api_key='+key
 print('REQUESTING GAME STATUS..\n')
 req_ingame = requests.get(r_ingame)
 #print('GAME STATUS RETURN TEXT: ' + req_ingame.text + '\n')
