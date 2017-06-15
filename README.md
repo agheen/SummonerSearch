@@ -1,6 +1,6 @@
 README for summonersearch.py
 
-download the folder containing summonerseach.py, champions.py, and filler.py.
+download the folder containing summonerseach.py
 
 summonerseach: program that search users ranking, wins, losses, and in-game status.
 	how to run summonerseach.py:
