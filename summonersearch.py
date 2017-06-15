@@ -1,4 +1,4 @@
-#Austin Gheen. April 2017
+#Austin Gheen. April 2017. Updated: 6/14/17
 
 import requests
 from champions import champ_pool
@@ -19,73 +19,45 @@ def get_id(name):
 	#grabs summoner id from req.text
 	global sum_id
 	sum_id = str(req_summoner.json().get(name).get('id'))
-	#print('Summoner Id: ' + sum_id + '\n')
+	print('Summoner Id: ' + sum_id + '\n')
 
 def get_ranked():
 	#RANKED RANKING REQUEST
 	#requests summoners solo/duo leauge
-	r_league = 'https://na.api.riotgames.com/api/lol/NA/v2.5/league/by-summoner/'+sum_id+'?api_key='+key
-	req_league = requests.get(r_league)
-	#print(req_league.text)
+	r_rankedposition = 'https://na1.api.riotgames.com/lol/league/v3/positions/by-summoner/'+sum_id+'?api_key='+key
 
 	############
 	#RANKED INFO
 	############
 
-	#json object containing 2 dictionaries, which are SOLO/DUO and FLEX league
-	summoner_league = req_league.json().get(sum_id)
+	#request for ranked positions
+	req_position = requests.get(r_rankedposition)
 
-	#grabs list of members in league (entries)
-	solo_league = summoner_league[0]
-	solo_entries = solo_league.get('entries')
+	#dictionary that could be 0 to 3 elements long. each element is a ranking in a league. solo, flex, 3v3
+	positions = req_position.json()
 
-	for league in summoner_league:
-		if league.get('queue') == 'RANKED_SOLO_5x5':
-			#grabs list of members in league (entries)
-			solo_league = league
-			solo_entries = solo_league.get('entries')
-			#searches through list for desired summoner
-			#when found, grabs summoners divison, wins, losses
-			for solo_member in solo_entries:
-				player_id = solo_member.get('playerOrTeamId')
-				if player_id == sum_id:
-					solo_division = solo_member.get('division')
-					solo_tier = solo_league.get('tier')
-					solo_points = str(solo_member.get('leaguePoints'))
-					solo_wins = solo_member.get('wins')
-					solo_losses = solo_member.get('losses')
-					solo_total = solo_wins + solo_losses
-					solo_win_percentage = round(solo_wins/solo_total, 4) * 100
+	for position in positions:
+		queueType = position.get('queueType')
+		if queueType == 'RANKED_SOLO_5x5':
+			queueType = 'Solo/Duo'
+		if queueType == 'RANKED_FLEX_SR':
+			queueType = 'Flex'
 
-					print('\nSOLO/DUO:' + solo_tier + ' ' + solo_division + ' ' + solo_points
-						+ ' LP\nW/L: ' + str(solo_wins) + '/' + str(solo_losses) 
-						+ '\nWIN%: ' + str(solo_win_percentage) + '%\n' )
+		tier = position.get('tier')
+		rank = position.get('rank')
+		leaguePoints = position.get('leaguePoints')
+		wins = position.get('wins')
+		losses = position.get('losses')
+		win_percentage = round(wins/(wins+losses), 4) * 100
 
-		if league.get('queue') == 'RANKED_FLEX_SR':
-			#grabs list of members in league (entries)
-			flex_league = league
-			flex_entries = flex_league.get('entries')
-			#searches through list for desired summoner
-			#when found, grabs summoners divison, wins, loses
-			for flex_member in flex_entries:
-				player_id = flex_member.get('playerOrTeamId')
-				if player_id == sum_id:
-					flex_division = flex_member.get('division')
-					flex_tier = flex_league.get('tier')
-					flex_points = str(flex_member.get('leaguePoints'))
-					flex_wins = flex_member.get('wins')
-					flex_losses = flex_member.get('losses')
-					flex_total = flex_wins + flex_losses
-					flex_win_percentage = round(flex_wins/flex_total, 4) * 100
-
-					print('FLEX:' + flex_tier + ' ' + flex_division + ' ' + flex_points
-						+ ' LP\nW/L: ' + str(flex_wins) + '/' + str(flex_losses) 
-						+ '\nWIN%: ' + str(flex_win_percentage) + '%\n' )
+		print('\n'+ queueType +': ' + tier + ' ' + rank + ' ' + str(leaguePoints)
+						+ ' LP\nW/L: ' + str(wins) + '/' + str(losses) 
+						+ '\nWIN%: ' + str(win_percentage) + '%\n' )
 
 def get_ingame():
 	#IN-GAME REQUEST
 	#requests summoner in-game status, 404 if not in game
-	r_ingame = 'https://na.api.riotgames.com/observer-mode/rest/consumer/getSpectatorGameInfo/NA1/'+sum_id+'?api_key='+key
+	r_ingame = 'https://na1.api.riotgames.com/lol/spectator/v3/active-games/by-summoner/'+sum_id+'?api_key='+key
 	print('REQUESTING GAME STATUS..\n')
 	req_ingame = requests.get(r_ingame)
 	#print('GAME STATUS RETURN TEXT: ' + req_ingame.text + '\n')
@@ -107,7 +79,7 @@ def get_ingame():
 		game_queue = req_ingame.json().get('gameQueueConfigId')
 
 		if game_queue == None:
-			print('Currently playing Custom\n')
+			print('Currently playing Custom Game\n')
 		if game_queue == 420:
 			print('Currently playing Solo/Duo Queue\n')
 		if game_queue == 440:
@@ -126,24 +98,31 @@ def get_ingame():
 		for players in game_participants:
 			name = str(players.get('summonerName'))
 			champion_id = players.get('championId')
-			champ_name = str(champ_pool.get(champion_id))
+			champ_name = get_champion(champion_id)
 			print('Player ' + str(i) + ': ' + name + 
 				'\nChampion: ' + champ_name + '\n')
 			
 			i+=1
 
+def get_champion(champ_id):
+	champ_id = str(champ_id)
+	r_champion = 'https://na1.api.riotgames.com/lol/static-data/v3/champions/'+champ_id+'?locale=en_US&dataById=false&api_key='+key
+	req_champ = requests.get(r_champion)
+	champ = req_champ.json()
+	return champ.get('name')
+
 def run_prog():
 	#key for API
+	
+	#print("Key: "+key)
 	global key
 	key = 'aff44123-649d-4e9b-a431-2a7bbe8141e5'
-	#print("Key: "+key)
 	#print(' ')#for spacing
 
 	#asks for summoner name from user. take out whitespaces if there are any
 	inp1 = input('\nEnter summoner name:')
-	inp1.strip()
 	print('\nSummoner: ' + inp1 + '\n')
-	inp1 = inp1.replace(' ', '')
+	inp1 = inp1.replace(' ', '').lower()
 
 	get_id( inp1 )
 
