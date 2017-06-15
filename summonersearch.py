@@ -1,7 +1,6 @@
 #Austin Gheen. April 2017. Updated: 6/14/17
 
 import requests
-from champions import champ_pool
 
 ##########
 #FUNCTIONS
@@ -19,7 +18,7 @@ def get_id(name):
 	#grabs summoner id from req.text
 	global sum_id
 	sum_id = str(req_summoner.json().get(name).get('id'))
-	print('Summoner Id: ' + sum_id + '\n')
+	#print('Summoner Id: ' + sum_id + '\n')
 
 def get_ranked():
 	#RANKED RANKING REQUEST
