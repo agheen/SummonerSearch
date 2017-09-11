@@ -1,4 +1,4 @@
-#Austin Gheen. April 2017. Updated: 6/14/17
+#Austin Gheen. April 2017. Updated: 9/11/17
 
 import requests
 
@@ -7,7 +7,7 @@ import requests
 ##########
 def get_id(name):
 	#creates variable, r_summoner, for urllink for api
-	r_summoner = 'https://na.api.riotgames.com/api/lol/NA/v1.4/summoner/by-name/'+name+'?api_key='+key
+	r_summoner = 'https://na1.api.riotgames.com/lol/summoner/v3/summoners/by-name/'+name+'?api_key='+key
 	#print('URL for request: ' + r_summoner + '\n')
 
 	#requests summoners account info
@@ -17,7 +17,7 @@ def get_id(name):
 
 	#grabs summoner id from req.text
 	global sum_id
-	sum_id = str(req_summoner.json().get(name).get('id'))
+	sum_id = str(req_summoner.json().get('id'))
 	#print('Summoner Id: ' + sum_id + '\n')
 
 def get_ranked():
@@ -115,7 +115,7 @@ def run_prog():
 	
 	#print("Key: "+key)
 	global key
-	key = 'aff44123-649d-4e9b-a431-2a7bbe8141e5'
+	key = '<ADD YOUR API KEY HERE>'
 	#print(' ')#for spacing
 
 	#asks for summoner name from user. take out whitespaces if there are any
