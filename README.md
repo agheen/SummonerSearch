@@ -1,3 +1,5 @@
+# SummonerSearch
+
 README for summonersearch.py
 
 Last updated: 9/11/17
